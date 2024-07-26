@@ -275,8 +275,6 @@ fn game_level(rng: &mut impl RandRange<u16>, level: u8, picture: &[u8]) -> Level
         unsafe {
             vsync();
 
-            delay(2);
-
             // implement exit (ESC)
             let key = key::get_keypress();
             if key == 0x01 {
