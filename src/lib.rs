@@ -7,6 +7,7 @@ mod tiles;
 
 use audio::{is_sound_on, play_click, play_tune, sound_off};
 use dos_x::djgpp::dos::delay;
+use dos_x::djgpp::dpmi::{__dpmi_int, __dpmi_regs};
 use dos_x::key;
 use dos_x::vga::Palette;
 use tiles::{Move, Tiles};
@@ -51,6 +52,13 @@ fn dos_main() {
 
 fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
     println!("Tilers by E_net4 (2024)");
+
+    // disable the mouse
+    unsafe {
+        let mut regs: __dpmi_regs = core::mem::zeroed();
+        regs.h.ah = 2;
+        __dpmi_int(0x33, &mut regs);
+    }
 
     play_tune();
 
