@@ -1,4 +1,7 @@
-use dos_x::djgpp::{dos::delay, pc::{inportb, outportb}};
+use dos_x::djgpp::{
+    dos::delay,
+    pc::{inportb, outportb},
+};
 
 static mut NO_SOUND: bool = false;
 
@@ -20,9 +23,7 @@ pub fn sound_off() {
 }
 
 pub fn is_sound_on() -> bool {
-    unsafe {
-        !NO_SOUND
-    }
+    unsafe { !NO_SOUND }
 }
 
 /// Play a tune using PC speaker
