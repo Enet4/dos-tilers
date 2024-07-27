@@ -39,7 +39,7 @@ You will find the .exe file in `build/debug/` or `build/release/`.
 Add the resulting `TILERS.EXE` alongside `CWSDPMI.EXE`
 to your DOS machine or emulator.
 The absolute minimum requirements are
-an i386 with a VGA display.
+an i486 with a VGA display.
 
 ```bat
 TILERS
