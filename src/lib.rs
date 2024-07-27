@@ -140,8 +140,9 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
                 unsafe {
                     if is_sound_on() {
                         play_tune();
+                        delay(500);
                     } else {
-                        delay(1_500);
+                        delay(2_000);
                     }
                 }
 
@@ -206,7 +207,7 @@ fn game_level(rng: &mut impl RandRange<u16>, level: u8, picture: &[u8]) -> Level
     let (cols, rows) = match level {
         0 => (3, 2),
         1 => (4, 3),
-        2 => (6, 4),
+        2 => (5, 4),
         _ => return LevelOutcome::Complete,
     };
 

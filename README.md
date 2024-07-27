@@ -13,7 +13,6 @@ to move a tile to the empty slot.
 Rearrange the pieces until the picture is fully organized.
 Press ESC to exit.
 
-
 ## Building
 
 First you need:
