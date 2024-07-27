@@ -303,15 +303,17 @@ fn animate_tile_move(
     // determine the position of the tile to move in the picture
     let (pic_x, pic_y) = tiles.position_of(x, y);
 
-    let (origin_x, origin_y) = pixel_position(pic_x, pic_y, tile_width, tile_height, tiles.cols);
-    let origin = (
-        origin_x,
-        origin_y,
+    let (origin_x, origin_y) = pixel_position(
+        pic_x,
+        pic_y,
         tile_width,
         tile_height,
+        tiles.cols,
+        tiles.rows,
     );
+    let origin = (origin_x, origin_y, tile_width, tile_height);
 
-    let (x, y) = pixel_position_i32(x, y, tile_width, tile_height, tiles.cols);
+    let (x, y) = pixel_position_i32(x, y, tile_width, tile_height, tiles.cols, tiles.rows);
 
     let mut d_x = 0;
     let mut d_y = 0;
@@ -369,7 +371,7 @@ fn draw_tiles_animated(
     // draw puzzle tiles to the screen
     for k in 0..cols as u16 * tiles.rows as u16 {
         let (i, j) = tiles.where_is(k);
-        let (x, y) = pixel_position_i32(i, j, tile_width, tile_height, tiles.cols);
+        let (x, y) = pixel_position_i32(i, j, tile_width, tile_height, tiles.cols, tiles.rows);
 
         if k == 0 {
             // draw a black rectangle instead
@@ -385,8 +387,14 @@ fn draw_tiles_animated(
         let tile_n = (k % cols) as u8;
         let tile_m = (k / cols) as u8;
 
-        let (origin_x, origin_y) =
-            pixel_position(tile_n, tile_m, tile_width, tile_height, tiles.cols);
+        let (origin_x, origin_y) = pixel_position(
+            tile_n,
+            tile_m,
+            tile_width,
+            tile_height,
+            tiles.cols,
+            tiles.rows,
+        );
         let origin = (origin_x, origin_y, tile_width as u32, tile_height as u32);
         unsafe {
             vsync();
@@ -399,21 +407,43 @@ fn draw_tiles_animated(
 
 /// Obtain the expected x,y coordinates in pixels of a grid position,
 #[inline]
-fn pixel_position(col: u8, row: u8, tile_width: u32, tile_height: u32, cols: u8) -> (u32, u32) {
-    let x = col as u32 * tile_width;
-    let y = row as u32 * tile_height;
+fn pixel_position(
+    col: u8,
+    row: u8,
+    tile_width: u32,
+    tile_height: u32,
+    cols: u8,
+    rows: u8,
+) -> (u32, u32) {
+    let mut x = col as u32 * tile_width;
+    let mut y = row as u32 * tile_height;
 
     // compensate with +1px in the case of 3 columns
-    // so that the puzzle stays centered
-    let x = if cols == 3 { x + 1 } else { x };
+    // so that the puzzle stays centered horizontally
+    if cols == 3 {
+        x += 1;
+    }
+
+    // compensate with +1px in the case of 3 rows
+    // so that the puzzle stays centered vertically
+    if rows == 3 {
+        y += 1;
+    }
 
     (x, y)
 }
 
 /// Obtain the expected x,y coordinates in pixels of a grid position
 #[inline]
-fn pixel_position_i32(col: u8, row: u8, tile_width: u32, tile_height: u32, cols: u8) -> (i32, i32) {
-    let (x, y) = pixel_position(col, row, tile_width, tile_height, cols);
+fn pixel_position_i32(
+    col: u8,
+    row: u8,
+    tile_width: u32,
+    tile_height: u32,
+    cols: u8,
+    rows: u8,
+) -> (i32, i32) {
+    let (x, y) = pixel_position(col, row, tile_width, tile_height, cols, rows);
     (x as i32, y as i32)
 }
 
