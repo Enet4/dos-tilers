@@ -1,4 +1,4 @@
-use dos_x::djgpp::{dos::delay, pc::inportb};
+use dos_x::djgpp::{dos::delay, pc::{inportb, outportb}};
 
 static mut NO_SOUND: bool = false;
 
@@ -27,8 +27,6 @@ pub fn is_sound_on() -> bool {
 
 /// Play a tune using PC speaker
 pub fn play_tune() {
-    use dos_x::djgpp::pc::outportb;
-
     if unsafe { NO_SOUND } {
         return;
     }
@@ -44,17 +42,9 @@ pub fn play_tune() {
 
     const NOTE_VOID: u16 = 3;
 
-    #[inline]
-    unsafe fn play_note(countdown: u16) {
-        outportb(0x42, (countdown & 0xff) as u8);
-        outportb(0x42, (countdown >> 8) as u8);
-    }
-
     // use PC speaker
     unsafe {
-        let inb = inportb(0x61);
-        outportb(0x61, inb | 3); // enable speaker
-        outportb(0x43, 0xb6); // set PIT
+        pc_speaker_on();
 
         // String Quintet in E Major, Op. 11, No. 5, G. 275: III. Minuetto by Boccherini
         play_note(NOTE_A6);
@@ -101,32 +91,47 @@ pub fn play_tune() {
         delay(280);
 
         // turn off
-        outportb(0x61, 0);
-        delay(280);
+        pc_speaker_off();
+        delay(140);
     }
 }
 
 /// Play a click sound
 pub fn play_click() {
-    use dos_x::djgpp::pc::outportb;
-
     if unsafe { NO_SOUND } {
         return;
     }
 
     // use PC speaker
     unsafe {
-        let inb = inportb(0x61);
-        outportb(0x61, inb | 3); // enable speaker
-        outportb(0x43, 0xb6); // set PIT
+        pc_speaker_on();
 
         // a note played fast enough will sound like a click
         let countdown = 1500;
-        outportb(0x42, (countdown & 0xff) as u8);
-        outportb(0x42, (countdown >> 8) as u8);
+        play_note(countdown);
         delay(4);
 
         // turn off
-        outportb(0x61, 0);
+        pc_speaker_off();
     }
+}
+
+#[inline]
+unsafe fn play_note(countdown: u16) {
+    outportb(0x42, (countdown & 0xff) as u8);
+    outportb(0x42, (countdown >> 8) as u8);
+}
+
+#[inline]
+unsafe fn pc_speaker_on() {
+    unsafe {
+        let inb = inportb(0x61);
+        outportb(0x61, inb | 3); // enable speaker
+        outportb(0x43, 0xb6); // set PIT
+    }
+}
+
+#[inline(always)]
+unsafe fn pc_speaker_off() {
+    outportb(0x61, 0);
 }
