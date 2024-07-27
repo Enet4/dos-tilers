@@ -3,7 +3,7 @@ set -eu
 
 CC=${CC:-i686-pc-msdosdjgpp-gcc}
 AR=${AR:-ar}
-ARCH=${ARCH:-i386}
+ARCH=${ARCH:-i486}
 elf2djgpp=elf2djgpp
 target=debug
 

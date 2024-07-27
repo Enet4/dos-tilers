@@ -28,7 +28,7 @@ Then:
 - If your DJGPP toolchain is not named `i686-pc-msdosdjgpp-gcc`,
   set the environment variable `CC` to the right path.
 - Set `ARCH` depending on the target architecture intended
-  (default is `i386`)
+  (default is `i486`)
 - Run `./build.sh` or `./build.sh release`
   (the latter builds with optimizations)
 
