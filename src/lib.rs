@@ -38,13 +38,15 @@ fn dos_main() {
                 sound_off();
             } else if arg.to_bytes() == b"iknowwhatimdoing" {
                 starting_level = 2;
-            } else {
-                // try to interpret it as an integer
-                if let Ok(s) = core::str::from_utf8(arg.to_bytes()).unwrap().parse::<u64>() {
-                    // use it as a seed for the rng
-                    seed = s;
-                    break;
-                }
+            // try to interpret it as an integer
+            } else if let Ok(s) = core::str::from_utf8(arg.to_bytes()).unwrap().parse::<u64>() {
+                // use it as a seed for the rng
+                seed = s;
+                continue;
+            } else if &md5::compute(arg.to_bytes()).0
+                == b"\xbf\x00\xed\x3c\x1a\xcc\xe2\x78\x5c\x6a\x67\xa5\x26\xf9\xfe\x14"
+            {
+                starting_level = 3;
             }
         }
     }
@@ -281,18 +283,17 @@ enum LevelOutcome {
     /// Exit the game
     Exit,
     /// Proceed to the next level
-    /// (or just end with a congratulatory message if there are no more)
+    /// (or just end with a congratulatory message if there are no more levels)
     NextLevel,
-    /// Exit the game with a congraulatory message
-    Complete,
 }
 
 fn game_level(rng: &mut impl RandRange<u16>, level: u8, picture: &[u8]) -> LevelOutcome {
     let (cols, rows) = match level {
         0 => (3, 2),
         1 => (4, 3),
-        2 => (5, 4),
-        _ => return LevelOutcome::Complete,
+        2..=8 => (5, 4),
+        // secret difficulty
+        _ => (8, 5),
     };
 
     // decide the total width & height of the puzzle

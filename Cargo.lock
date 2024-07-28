@@ -12,6 +12,7 @@ name = "dos-jam-july-2024"
 version = "0.1.0"
 dependencies = [
  "dos_x",
+ "md5",
  "minipng",
  "tinyrand",
 ]
@@ -23,6 +24,12 @@ source = "git+https://github.com/Enet4/dos-rs?rev=fb0249a6#fb0249a6deacc97835b68
 dependencies = [
  "djgpp",
 ]
+
+[[package]]
+name = "md5"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "490cc448043f947bae3cbee9c203358d62dbee0db12107a74be5c30ccfd09771"
 
 [[package]]
 name = "minipng"
