@@ -456,10 +456,13 @@ fn pixel_position_i32(
 }
 
 #[panic_handler]
-fn handle_panic(_info: &PanicInfo) -> ! {
+fn handle_panic(info: &PanicInfo) -> ! {
     unsafe {
         // reset video mode
         dos_x::vga::set_video_mode(0x02);
+        println!("Program aborted: {}", info);
+        println!("This is likely a bug! Please reach out:");
+        println!("    https://github.com/Enet4/dos-tilers/issues/new");
         // exit using libc
         exit(-1);
         core::hint::unreachable_unchecked()
