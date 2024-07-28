@@ -10,9 +10,12 @@ use dos_x::djgpp::dos::delay;
 use dos_x::djgpp::dpmi::{__dpmi_int, __dpmi_regs};
 use dos_x::key;
 use dos_x::vga::Palette;
+use minipng::ImageData;
 use tiles::{Move, Tiles};
 
 use alloc::vec;
+use alloc::vec::Vec;
+use core::ffi::CStr;
 use core::panic::PanicInfo;
 use dos_x::vga::vsync;
 use dos_x::{djgpp::stdlib::exit, println};
@@ -70,14 +73,11 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
 
     // load image for the first puzzle
 
+    let mut png_buf = Vec::new();
     let mut buf = vec![0; 80_000];
 
-    let mut image = match minipng::decode_png(IMAGE_1_DATA, &mut buf) {
-        Ok(image) => image,
-        Err(e) => {
-            println!("Error: {}", e);
-            return;
-        }
+    let Some(mut image) = load_level_picture(0, &mut png_buf, &mut buf) else {
+        unreachable!();
     };
 
     dos_x::vga::set_video_mode_13h();
@@ -94,26 +94,13 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
 
         if level > 0 {
             // load the next image
-
-            let img_data = match level {
-                0 => IMAGE_1_DATA,
-                1 => IMAGE_2_DATA,
-                _ => IMAGE_3_DATA,
-            };
-
-            image = match minipng::decode_png(img_data, &mut buf) {
-                Ok(image) => image,
-                Err(e) => {
-                    unsafe {
-                        dos_x::vga::set_video_mode(0x02);
-                    }
-                    println!("Error: {}", e);
-                    unsafe {
-                        exit(2);
-                        unreachable!();
-                    }
+            image = match load_level_picture(level, &mut png_buf, &mut buf) {
+                Some(img) => img,
+                None => {
+                    win = true;
+                    break;
                 }
-            };
+            }
         }
 
         // set up palette
@@ -167,10 +154,6 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
                     }
                 }
             }
-            LevelOutcome::Complete => {
-                win = true;
-                break;
-            }
         }
     }
 
@@ -196,6 +179,99 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
     }
 
     println!("Thank you for playing Tilers (2024)");
+}
+
+/// Load the picture for a given level.
+///
+/// First it looks for a file named "#.png" where # is the level number
+/// (starting from 1 instead of 0).
+/// If the PNG is OK, we're done!
+/// Otherwise, grab the default picture for the level
+/// from the embedded resources,
+/// or exit the level if there are no embedded pictures for that level.
+fn load_level_picture<'a>(
+    level: u8,
+    png_buffer: &mut Vec<u8>,
+    img_buffer: &'a mut [u8],
+) -> Option<ImageData<'a>> {
+    if level >= 99 {
+        return None;
+    }
+
+    let number = level + 1;
+
+    let mut filename = *b"#.png\0\0";
+    // write the file name to the buffer above
+    let l = level + 1;
+    if l < 10 {
+        filename[0] = b'0' + l;
+    } else {
+        filename = *b"##.png\0";
+        filename[0] = b'0' + (l / 10);
+        filename[1] = b'0' + (l % 10);
+    }
+
+    let cfilename = CStr::from_bytes_until_nul(&filename).unwrap();
+
+    let (pic_data, custom) = if let Ok(png_data) = dos_x::fs::read(cfilename) {
+        // Note: inefficient copy, consider optimizing
+        // by writing directly to our buffer.
+        png_buffer.resize(png_data.len(), 0);
+        //png_buffer.resize(png_data.len(), 0);
+        png_buffer.copy_from_slice(&png_data[..]);
+
+        (&png_buffer[..], true)
+    } else {
+        (
+            match number {
+                1 => IMAGE_1_DATA,
+                2 => IMAGE_2_DATA,
+                3 => IMAGE_3_DATA,
+                _ => return None,
+            },
+            false,
+        )
+    };
+
+    match minipng::decode_png(pic_data, img_buffer) {
+        Ok(image) => {
+            // validate
+            if custom {
+                if image.width() != 320 || image.height() != 200 {
+                    unsafe {
+                        dos_x::vga::set_video_mode(0x02);
+                    }
+                    println!("Error: Custom image must be 320x200 pixels");
+                    unsafe {
+                        exit(2);
+                        unreachable!();
+                    }
+                }
+                if image.color_type() != minipng::ColorType::Indexed {
+                    unsafe {
+                        dos_x::vga::set_video_mode(0x02);
+                    }
+                    println!("Error: Custom image must be indexed");
+                    unsafe {
+                        exit(2);
+                        unreachable!();
+                    }
+                }
+            }
+
+            Some(image)
+        }
+        Err(e) => {
+            unsafe {
+                dos_x::vga::set_video_mode(0x02);
+            }
+            println!("Error: {}", e);
+            unsafe {
+                exit(2);
+                unreachable!();
+            }
+        }
+    }
 }
 
 /// What the game should do as the level ends

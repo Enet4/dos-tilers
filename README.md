@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/Enet4/dos-tilers/actions/workflows/ci.yml/badge.svg)](https://github.com/Enet4/dos-tilers/actions/workflows/ci.yml)
 
-A relaxing tile-based puzzle game for MS-DOS.
+A relaxing tile permutation puzzle game for MS-DOS.
 
 Created for the [DOS Games July 2024 Jam](https://itch.io/jam/dos-games-july-2024-jam).
 
@@ -58,6 +58,54 @@ append an integer to the command line arguments for the seed.
 ```bat
 TILERS 123456
 ```
+
+## Modding the game
+
+You can add your own pictures too!
+If you add PNG files with the name `#.PNG`
+(where `#` is the level number starting with 1)
+next to `TILERS.EXE`
+they will be picked up automatically and used as the picture for that level.
+For instance, if your directory structure is like this:
+
+```none
+dir
+
+.                <DIR>
+..               <DIR>
+1         PNG
+CWSDPMI   EXE
+TILERS    EXE
+```
+
+Then the first level will use the image file in `1.png`
+instead of the default picture for level 1
+(the _Monet_ painting _La plage à Pourville, soleil couchant_).
+
+Moreover, you can do this to extend the number of levels available!
+Add `4.png` to unlock level 4,
+`5.png` for a fifth level,
+and so on.
+
+Note however, that there are restrictions in place for the image:
+
+- It must be a valid PNG image file in 8-bit indexed color mode
+- It must have the exact resolution of 320x200
+- It should not have more than 240 colors in total
+  (the last few colors are reserved to the application
+  and may affect presentation if this is ignored)
+- And of course, not all pictures are visually appropriate
+  for this kind of puzzle.
+  The program will not check for identical tiles,
+  so make it visually appealing as well as feasible to play!
+
+You can use tools such as ImageMagick to adapt your image:
+
+```sh
+magick in.png -resize 320x200 +dither -colors 240 PNG8:4.png
+```
+
+The command above works best when the input image is 4:3 in aspect ratio.
 
 ## License
 
