@@ -3,6 +3,7 @@
 extern crate alloc;
 
 mod audio;
+mod stats;
 mod tiles;
 
 use audio::{is_sound_on, play_click, play_tune, sound_off};
@@ -11,6 +12,7 @@ use dos_x::djgpp::dpmi::{__dpmi_int, __dpmi_regs};
 use dos_x::key;
 use dos_x::vga::Palette;
 use minipng::ImageData;
+use stats::{add_move, total_moves};
 use tiles::{Move, Tiles};
 
 use alloc::vec;
@@ -180,6 +182,11 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
         println!("Congratulations! You have completed the game!");
     }
 
+    let total_moves = total_moves();
+    if total_moves > 4 {
+        println!("The tiles were moved {} times in total.", total_moves);
+    }
+
     println!("Thank you for playing Tilers (2024)");
 }
 
@@ -343,6 +350,8 @@ fn game_level(rng: &mut impl RandRange<u16>, level: u8, picture: &[u8]) -> Level
             );
             // apply the move proper
             tiles.do_move(m);
+            // increment the move counter
+            add_move();
             // click!
             play_click();
 
