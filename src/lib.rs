@@ -28,6 +28,10 @@ static IMAGE_1_DATA: &[u8] = include_bytes!("../resources/1.png");
 static IMAGE_2_DATA: &[u8] = include_bytes!("../resources/2.png");
 static IMAGE_3_DATA: &[u8] = include_bytes!("../resources/3.png");
 
+/// 16x16 floppy disk icon, raw 8-bit indexed data
+/// (already assumes game palette for B&W)
+static FLOPPY_DATA: &[u8] = include_bytes!("../resources/floppy_16px.data");
+
 #[no_mangle]
 fn dos_main() {
     // process inputs
@@ -93,7 +97,19 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
     let mut level = starting_level;
     loop {
         unsafe {
+            vsync();
             dos_x::vga::draw_rect(0, 0, 320, 200, 255);
+            // ensure that black (255) and white (254) is in the palette
+            dos_x::vga::set_color_single(0xFE, 63, 63, 63);
+            dos_x::vga::set_color_single(0xFF, 0, 0, 0);
+            // for the first level we load the game in text mode
+            // to let the player see the introductory text.
+            // for the remaining levels we show a loading screen in video mode.
+            if level > 0 {
+                // draw floppy disk onto the screen
+                // (suggesting that the game is loading)
+                dos_x::vga::blit_rect(FLOPPY_DATA, (16, 16), (0, 0, 16, 16), (152, 92));
+            }
         }
 
         if level > 0 {
