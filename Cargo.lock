@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "djgpp"
 version = "0.1.0"
-source = "git+https://github.com/Enet4/dos-rs?rev=fb0249a6#fb0249a6deacc97835b6855312e308ed294e1318"
+source = "git+https://github.com/Enet4/dos-rs?rev=e89d92f9#e89d92f9a49d3048dca91806c7f20c23f900d969"
 
 [[package]]
 name = "dos-jam-july-2024"
@@ -20,7 +20,7 @@ dependencies = [
 [[package]]
 name = "dos_x"
 version = "0.1.0"
-source = "git+https://github.com/Enet4/dos-rs?rev=fb0249a6#fb0249a6deacc97835b6855312e308ed294e1318"
+source = "git+https://github.com/Enet4/dos-rs?rev=e89d92f9#e89d92f9a49d3048dca91806c7f20c23f900d969"
 dependencies = [
  "djgpp",
 ]
