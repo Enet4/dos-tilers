@@ -238,14 +238,23 @@ fn load_level_picture<'a>(
 
     let cfilename = CStr::from_bytes_until_nul(&filename).unwrap();
 
-    let (pic_data, custom) = if let Ok(png_data) = dos_x::fs::read(cfilename) {
-        // Note: inefficient copy, consider optimizing
-        // by writing directly to our buffer.
-        png_buffer.resize(png_data.len(), 0);
-        //png_buffer.resize(png_data.len(), 0);
-        png_buffer.copy_from_slice(&png_data[..]);
+    let file = dos_x::fs::File::open(cfilename);
 
-        (&png_buffer[..], true)
+    let (pic_data, custom) = if let Ok(mut file) = file {
+        png_buffer.clear();
+        match file.read_to_end(png_buffer) {
+            Ok(_) => (&png_buffer[..], true),
+            Err(e) => {
+                unsafe {
+                    dos_x::vga::set_video_mode(0x02);
+                }
+                println!("Error: Failed to read custom image file: {}", e);
+                unsafe {
+                    exit(2);
+                    unreachable!();
+                }
+            }
+        }
     } else {
         (
             match number {
@@ -290,7 +299,7 @@ fn load_level_picture<'a>(
             unsafe {
                 dos_x::vga::set_video_mode(0x02);
             }
-            println!("Error: {}", e);
+            println!("Error: Could not decode PNG file: {}", e);
             unsafe {
                 exit(2);
                 unreachable!();
