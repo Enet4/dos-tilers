@@ -13,7 +13,5 @@ pub fn add_move() {
 
 #[inline]
 pub fn total_moves() -> u32 {
-    unsafe {
-        TOTAL_MOVES
-    }
+    unsafe { TOTAL_MOVES }
 }

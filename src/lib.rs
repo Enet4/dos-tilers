@@ -166,7 +166,7 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
                 // fade out
                 for _ in 0..64 {
                     unsafe {
-                        for p in &mut palette.0 {
+                        for p in palette.0.iter_mut().take(248 * 3) {
                             *p = p.saturating_sub(1);
                         }
                         vsync();
@@ -181,7 +181,7 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
 
     for _ in 0..64 {
         unsafe {
-            for p in &mut palette.0 {
+            for p in palette.0.iter_mut().take(248 * 3) {
                 *p = p.saturating_sub(1);
             }
             vsync();
