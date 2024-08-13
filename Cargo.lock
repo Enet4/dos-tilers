@@ -9,7 +9,7 @@ source = "git+https://github.com/Enet4/dos-rs?rev=e89d92f9#e89d92f9a49d3048dca91
 
 [[package]]
 name = "dos-jam-july-2024"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "dos_x",
  "md5",

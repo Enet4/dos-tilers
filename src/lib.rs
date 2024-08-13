@@ -62,7 +62,7 @@ fn dos_main() {
 }
 
 fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
-    println!("Tilers by E_net4 (2024, v0.2.0)");
+    println!("Tilers by E_net4 (2024, v0.2.2)");
 
     // disable the mouse
     unsafe {
