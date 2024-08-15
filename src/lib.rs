@@ -476,7 +476,7 @@ fn animate_tile_move(
     }
 }
 
-/// Draw all tiles of the puzzle
+/// Draw all tiles of the puzzle iteratively, tile by tile.
 ///
 /// Needed when the level starts.
 fn draw_tiles_animated(
@@ -519,7 +519,9 @@ fn draw_tiles_animated(
             vsync();
             dos_x::vga::blit_rect(picture, (width as u32, height as u32), origin, target);
 
-            delay(50);
+            // timeout after drawing each tile for an animation effect
+            // (making it faster if the puzzle is larger)
+            delay(if tiles.cols > 4 { 50 } else { 75 });
         }
     }
 }
