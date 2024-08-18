@@ -196,6 +196,9 @@ fn run(mut rng: impl RandRange<u16>, starting_level: u8) {
 
     if win {
         println!("Congratulations! You have completed the game!");
+        if level == 3 {
+            println!("Or have you? Consider installing more levels!");
+        }
     }
 
     let total_moves = total_moves();
